@@ -10,13 +10,26 @@ def spherical_to_cartesian(r, theta, phi):
         r * np.cos(theta)])
 
 
-def make_simple_signals_fourier(n_channels, center_frequency=200, sampling_frequency = 51200, n_samples = 51200):
-    timestamps = np.arange(0, n_samples / sampling_frequency, 1 / sampling_frequency)
-    # sine wave
-    signals = 1.0 * np.exp(-2j * np.pi * center_frequency * np.tile(timestamps, (n_channels, 1)))
+def make_simple_signals(n_channels, n_samples, center_frequency=0.1, magnitude=1.0):
+    """
+    Make simple multichannel time-domain signal.
+    :param n_channels:
+    :param center_frequency: normalized frequency of the sine wave
+    :param n_samples:
+    :return:
+    """
+
+    # center_freq_hz = center_frequency * fs
+    # interval_n = fs * (1/center_freq_hz) = 1/ center_Frequency
+
+    timesteps = range(n_samples)
+    # main sine wave
+    sin_period = 1.0 / center_frequency
+    signals = magnitude * np.sin(np.stack([timesteps for i in range(n_channels)]) / sin_period * 2 * np.pi)
     # noise
-    signals += 0.1 * (np.random.randn(n_channels, n_samples) + 1j * np.random.randn(n_channels, n_samples))
-    return sampling_frequency, n_samples, timestamps, signals
+    signals += np.random.normal(loc=0.0, scale=magnitude*0.0, size=[n_channels, n_samples])
+    return signals
+
 
 
 def make_steering_vector(mic_positions, wave_vector, frequencies, speed_of_sound=340, plot_system=False):
